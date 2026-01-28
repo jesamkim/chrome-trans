@@ -7,7 +7,7 @@ Amazon Bedrock Claude Haiku 4.5 기반 웹페이지 번역 Chrome Extension
 - **웹페이지 전체 번역**: 현재 페이지를 한글로 번역
 - **원본 복원**: 클릭 한 번으로 원본 페이지로 복원
 - **Amazon Bedrock 연동**: Claude Haiku 4.5 모델 사용
-- **보안 정책 준수**: 회사 내부 AWS 계정 사용
+- **보안 정책 준수**: 회사 내부 노트북에서 웹페이지 번역 (Google Translate, Deepl 등이 허용되지 사용 안되는 환경)
 
 ## 기술 스택
 
@@ -37,8 +37,7 @@ npm install
 
 ### 4. AWS 인증 설정
 1. Extension 아이콘 클릭
-2. 설정 페이지에서 AWS Access Key ID/Secret Access Key 입력
-3. 또는 Bedrock API Key 입력
+2. 설정 페이지에서 발급받은 Amazon Bedrock API Key 입력
 
 ## 사용 방법
 
@@ -98,7 +97,7 @@ npm run dev
 
 MIT License
 
-## 개발자
+## 만든이
 
-Jesam Kim (jesamkim@amazon.com)
+Jesam Kim 
 AWS Solutions Architect
