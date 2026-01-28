@@ -370,11 +370,6 @@ function showTranslationTooltip(translatedText, rect, isError = false) {
 
   document.body.appendChild(tooltip);
 
-  // 5초 후 자동 숨김 (에러가 아닐 경우)
-  if (!isError) {
-    setTimeout(hideTranslationTooltip, 5000);
-  }
-
   // 클릭 시 툴팁 외부 클릭하면 닫기
   setTimeout(() => {
     document.addEventListener('click', handleOutsideClick);
