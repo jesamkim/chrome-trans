@@ -20,6 +20,9 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 
   // 기본 설정 초기화
   await initializeDefaultSettings();
+
+  // Context Menu 생성
+  createContextMenu();
 });
 
 /**
@@ -39,6 +42,37 @@ chrome.runtime.onStartup.addListener(async () => {
     }
   } catch (error) {
     console.warn('⚠️ 시작 시 초기화 실패:', error.message);
+  }
+});
+
+/**
+ * Context Menu 생성
+ */
+function createContextMenu() {
+  chrome.contextMenus.create({
+    id: 'translate-selection',
+    title: '선택 영역 번역',
+    contexts: ['selection']
+  });
+  console.log('✅ Context Menu 생성 완료');
+}
+
+/**
+ * Context Menu 클릭 핸들러
+ */
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  if (info.menuItemId === 'translate-selection' && info.selectionText) {
+    console.log('🔄 선택 영역 번역 시작:', info.selectionText.substring(0, 50) + '...');
+
+    // Content Script로 번역 요청 전송
+    try {
+      await chrome.tabs.sendMessage(tab.id, {
+        type: 'TRANSLATE_SELECTION',
+        text: info.selectionText
+      });
+    } catch (error) {
+      console.error('❌ 선택 영역 번역 실패:', error);
+    }
   }
 });
 
@@ -102,6 +136,10 @@ async function handleMessage(request, sender, sendResponse) {
         await handleTranslateRequest(request, sendResponse);
         break;
 
+      case 'TRANSLATE_SELECTION':
+        await handleTranslateSelection(request, sendResponse);
+        break;
+
       case 'CHECK_API_KEY':
         await handleCheckApiKey(sendResponse);
         break;
@@ -156,6 +194,47 @@ async function handleTranslateRequest(request, sendResponse) {
 
   } catch (error) {
     console.error('❌ 번역 실패:', error);
+    sendResponse({
+      success: false,
+      error: error.message
+    });
+  }
+}
+
+/**
+ * 선택 영역 번역 처리
+ */
+async function handleTranslateSelection(request, sendResponse) {
+  try {
+    console.log('🔄 선택 영역 번역 처리 시작');
+
+    // 클라이언트 초기화 확인
+    if (!bedrockClient || !translationManager) {
+      const initialized = await initializeClients();
+      if (!initialized) {
+        throw new Error('Bedrock 클라이언트 초기화 실패. API Key를 확인해주세요.');
+      }
+    }
+
+    // 설정에서 목표 언어 가져오기
+    const settings = await chrome.storage.sync.get(['targetLanguage']);
+    const targetLanguage = settings.targetLanguage || '한국어';
+
+    // 선택된 텍스트 번역
+    const { text } = request;
+    console.log(`📝 선택 영역 번역: ${text.substring(0, 50)}...`);
+
+    const translatedText = await bedrockClient.translate(text, targetLanguage);
+
+    console.log('✅ 선택 영역 번역 완료');
+
+    sendResponse({
+      success: true,
+      translatedText: translatedText
+    });
+
+  } catch (error) {
+    console.error('❌ 선택 영역 번역 실패:', error);
     sendResponse({
       success: false,
       error: error.message
