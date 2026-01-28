@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "AWS Translation Assistant",
+  "version": "1.0.0",
+  "description": "Amazon Bedrock 기반 웹페이지 번역 어시스턴트",
+
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+
+  "host_permissions": [
+    "https://bedrock-runtime.us-west-2.amazonaws.com/*",
+    "<all_urls>"
+  ],
+
+  "background": {
+    "service_worker": "src/background/background.js"
+  },
+
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": [
+      "src/content/dom-manager.js",
+      "src/content/content.js"
+    ],
+    "css": ["src/content/content.css"],
+    "run_at": "document_idle"
+  }],
+
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "AWS Translation Assistant"
+  },
+
+  "options_page": "src/options/options.html",
+
+  "icons": {
+    "16": "src/assets/icons/icon16.png",
+    "48": "src/assets/icons/icon48.png",
+    "128": "src/assets/icons/icon128.png"
+  },
+
+  "web_accessible_resources": [{
+    "resources": ["src/content/*"],
+    "matches": ["<all_urls>"]
+  }]
+}

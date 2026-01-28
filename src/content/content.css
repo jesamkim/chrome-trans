@@ -1,0 +1,17 @@
+/**
+ * Content Script 스타일
+ * 번역 상태 표시 및 오버레이
+ */
+
+/* 번역 오버레이 기본 스타일은 content.js에서 인라인으로 적용 */
+
+/* 번역된 페이지 표시 (선택 사항) */
+body.translated {
+  /* 번역된 상태 표시 스타일 */
+}
+
+/* 번역 중 페이지 상호작용 방지 (선택 사항) */
+body.translating {
+  pointer-events: none;
+  user-select: none;
+}

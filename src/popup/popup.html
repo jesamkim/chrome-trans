@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWS Translation Assistant</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>AWS Translation Assistant</h1>
+      <p class="subtitle">Powered by Claude Haiku 4.5</p>
+    </header>
+
+    <main>
+      <div id="status-section" class="section">
+        <div id="api-key-status" class="status-item">
+          <span class="status-label">API Key:</span>
+          <span id="api-key-indicator" class="status-value">확인 중...</span>
+        </div>
+        <div id="translation-status" class="status-item">
+          <span class="status-label">페이지 상태:</span>
+          <span id="page-status-indicator" class="status-value">확인 중...</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <button id="translate-btn" class="primary-btn" disabled>
+          <span class="btn-icon">🌐</span>
+          <span>번역</span>
+        </button>
+
+        <button id="restore-btn" class="secondary-btn" disabled>
+          <span class="btn-icon">↩️</span>
+          <span>Original Page</span>
+        </button>
+      </div>
+
+      <div id="error-section" class="section error-message" style="display: none;">
+        <p id="error-text"></p>
+      </div>
+
+      <div id="info-section" class="section info-message" style="display: none;">
+        <p id="info-text"></p>
+      </div>
+    </main>
+
+    <footer>
+      <button id="settings-btn" class="link-btn">설정</button>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

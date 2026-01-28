@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>설정 - AWS Translation Assistant</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>AWS Translation Assistant</h1>
+      <p class="subtitle">설정</p>
+    </header>
+
+    <main>
+      <section class="section">
+        <h2>AWS Bedrock API 인증</h2>
+        <p class="description">
+          Amazon Bedrock API Key를 입력하세요.
+          <a href="https://docs.aws.amazon.com/ko_kr/bedrock/latest/userguide/api-keys-generate.html" target="_blank">
+            API Key 생성 가이드
+          </a>
+        </p>
+
+        <div class="form-group">
+          <label for="api-key">Bearer API Key</label>
+          <input
+            type="password"
+            id="api-key"
+            placeholder="Bearer API Key를 입력하세요"
+            autocomplete="off"
+          >
+          <button id="toggle-api-key" class="toggle-btn" type="button">표시</button>
+        </div>
+
+        <div class="form-group">
+          <label for="target-language">목표 언어</label>
+          <select id="target-language">
+            <option value="한국어">한국어</option>
+            <option value="English">English</option>
+            <option value="日本語">日本語</option>
+            <option value="中文">中文</option>
+          </select>
+        </div>
+
+        <button id="save-btn" class="primary-btn">저장</button>
+      </section>
+
+      <section class="section">
+        <h2>모델 정보</h2>
+        <div class="info-box">
+          <p><strong>모델:</strong> Claude Haiku 4.5</p>
+          <p><strong>Model ID:</strong> global.anthropic.claude-haiku-4-5-20251001-v1:0</p>
+          <p><strong>리전:</strong> us-west-2</p>
+          <p><strong>특징:</strong> 가장 빠른 모델, 준최고 수준의 지능</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>사용 방법</h2>
+        <ol class="instructions">
+          <li>위에서 Bearer API Key를 입력하고 저장</li>
+          <li>번역하고 싶은 웹페이지로 이동</li>
+          <li>Extension 아이콘을 클릭하여 Popup 열기</li>
+          <li>"번역" 버튼 클릭</li>
+          <li>원본으로 돌아가려면 "Original Page" 버튼 클릭</li>
+        </ol>
+      </section>
+
+      <div id="status-message" class="status-message" style="display: none;">
+        <p id="status-text"></p>
+      </div>
+    </main>
+
+    <footer>
+      <p>Developed by Jesam Kim (jesamkim@amazon.com)</p>
+      <p>AWS Solutions Architect</p>
+    </footer>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
