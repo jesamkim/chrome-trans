@@ -27,7 +27,6 @@ Amazon Bedrock Claude Haiku 4.5 기반 웹페이지 번역 Chrome Extension
 - AWS 보라색 그라데이션 디자인의 아름다운 툴팁
 - 선택한 위치 바로 아래에 표시
 - 외부 클릭 또는 닫기 버튼으로 닫기
-- 비침투적 - 페이지를 건드리지 않음
 
 ### 3. 전체 페이지 번역
 ![전체 페이지 번역](./img/feature03.png)
@@ -143,5 +142,4 @@ MIT License
 
 ## 만든이
 
-Jesam Kim 
-AWS Solutions Architect
+Jesam Kim (AWS SA)
