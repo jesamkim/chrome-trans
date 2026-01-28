@@ -64,8 +64,32 @@ document.addEventListener('DOMContentLoaded', async () => {
             restoreBtn.disabled = true;
           }
         } catch (error) {
-          pageStatusIndicator.textContent = '확인 불가';
-          pageStatusIndicator.className = 'status-value warning';
+          // Content Script가 주입되지 않은 경우 동적으로 주입
+          console.log('Content Script 미주입 감지, 동적 주입 시도...');
+
+          try {
+            await injectContentScripts(tab.id);
+
+            // 주입 후 다시 상태 확인
+            const retryResult = await chrome.tabs.sendMessage(tab.id, {
+              type: 'CHECK_TRANSLATION_STATUS'
+            });
+
+            if (retryResult.isTranslated) {
+              pageStatusIndicator.textContent = '번역됨';
+              pageStatusIndicator.className = 'status-value translated';
+              translateBtn.disabled = true;
+              restoreBtn.disabled = false;
+            } else {
+              pageStatusIndicator.textContent = '원본';
+              pageStatusIndicator.className = 'status-value';
+              restoreBtn.disabled = true;
+            }
+          } catch (injectError) {
+            console.error('Content Script 주입 실패:', injectError);
+            pageStatusIndicator.textContent = '확인 불가';
+            pageStatusIndicator.className = 'status-value warning';
+          }
         }
       }
 
@@ -90,15 +114,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         throw new Error('활성 탭을 찾을 수 없습니다.');
       }
 
-      const response = await chrome.tabs.sendMessage(tab.id, {
-        type: 'START_TRANSLATION'
-      });
+      try {
+        const response = await chrome.tabs.sendMessage(tab.id, {
+          type: 'START_TRANSLATION'
+        });
 
-      if (response.success) {
-        showInfo('번역이 완료되었습니다!');
-        await checkStatus();
-      } else {
-        throw new Error(response.error || '번역 실패');
+        if (response.success) {
+          showInfo('번역이 완료되었습니다!');
+          await checkStatus();
+        } else {
+          throw new Error(response.error || '번역 실패');
+        }
+      } catch (messageError) {
+        // Content Script가 없으면 주입 후 재시도
+        console.log('Content Script 미주입 감지, 주입 후 재시도...');
+        await injectContentScripts(tab.id);
+
+        const response = await chrome.tabs.sendMessage(tab.id, {
+          type: 'START_TRANSLATION'
+        });
+
+        if (response.success) {
+          showInfo('번역이 완료되었습니다!');
+          await checkStatus();
+        } else {
+          throw new Error(response.error || '번역 실패');
+        }
       }
 
     } catch (error) {
@@ -124,15 +165,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         throw new Error('활성 탭을 찾을 수 없습니다.');
       }
 
-      const response = await chrome.tabs.sendMessage(tab.id, {
-        type: 'RESTORE_ORIGINAL'
-      });
+      try {
+        const response = await chrome.tabs.sendMessage(tab.id, {
+          type: 'RESTORE_ORIGINAL'
+        });
 
-      if (response.success) {
-        showInfo('원본 페이지로 복원되었습니다.');
-        await checkStatus();
-      } else {
-        throw new Error(response.error || '복원 실패');
+        if (response.success) {
+          showInfo('원본 페이지로 복원되었습니다.');
+          await checkStatus();
+        } else {
+          throw new Error(response.error || '복원 실패');
+        }
+      } catch (messageError) {
+        // Content Script가 없으면 주입 후 재시도
+        console.log('Content Script 미주입 감지, 주입 후 재시도...');
+        await injectContentScripts(tab.id);
+
+        const response = await chrome.tabs.sendMessage(tab.id, {
+          type: 'RESTORE_ORIGINAL'
+        });
+
+        if (response.success) {
+          showInfo('원본 페이지로 복원되었습니다.');
+          await checkStatus();
+        } else {
+          throw new Error(response.error || '복원 실패');
+        }
       }
 
     } catch (error) {
@@ -176,5 +234,37 @@ document.addEventListener('DOMContentLoaded', async () => {
   function hideMessages() {
     errorSection.style.display = 'none';
     infoSection.style.display = 'none';
+  }
+
+  /**
+   * Content Scripts 동적 주입
+   * 이미 열려 있던 페이지에 Content Script가 없는 경우 주입
+   */
+  async function injectContentScripts(tabId) {
+    try {
+      console.log('🔄 Content Scripts 동적 주입 시작...');
+
+      // CSS 주입
+      await chrome.scripting.insertCSS({
+        target: { tabId: tabId },
+        files: ['src/content/content.css']
+      });
+
+      // JavaScript 주입 (순서대로)
+      await chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        files: ['src/content/dom-manager.js']
+      });
+
+      await chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        files: ['src/content/content.js']
+      });
+
+      console.log('✅ Content Scripts 주입 완료');
+    } catch (error) {
+      console.error('❌ Content Scripts 주입 실패:', error);
+      throw error;
+    }
   }
 });
