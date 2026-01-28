@@ -7,6 +7,7 @@ class TranslationManager {
   constructor(bedrockClient) {
     this.bedrockClient = bedrockClient;
     this.maxChunkSize = 3000; // 한 번에 번역할 최대 문자 수
+    this.maxConcurrency = 3; // 동시 처리할 최대 청크 수
     this.cache = new Map(); // 번역 캐시
   }
 
@@ -23,36 +24,95 @@ class TranslationManager {
     const chunks = this._splitIntoChunks(textItems);
     console.log(`📦 ${chunks.length}개 청크로 분할됨`);
 
-    const results = [];
+    // 병렬 처리를 위한 결과 맵 (순서 보장)
+    const resultsMap = new Map();
+    let completedCount = 0;
 
-    // 각 청크를 순차적으로 번역
-    for (let i = 0; i < chunks.length; i++) {
-      const chunk = chunks[i];
-      console.log(`🔄 청크 ${i + 1}/${chunks.length} 번역 중...`);
-
-      try {
-        const translatedChunk = await this._translateChunk(chunk, targetLanguage);
-        results.push(...translatedChunk);
+    // 제한된 동시성으로 청크 병렬 처리
+    await this._processChunksWithConcurrency(
+      chunks,
+      targetLanguage,
+      (chunkIndex, translatedChunk) => {
+        // 성공 콜백
+        resultsMap.set(chunkIndex, translatedChunk);
+        completedCount++;
 
         // 진행률 업데이트
-        const progress = Math.round(((i + 1) / chunks.length) * 100);
+        const progress = Math.round((completedCount / chunks.length) * 100);
         chrome.runtime.sendMessage({
           type: 'TRANSLATION_PROGRESS',
           progress: progress
-        }).catch(() => {}); // 오류 무시 (메시지 수신자가 없을 수 있음)
+        }).catch(() => {});
 
-      } catch (error) {
-        console.error(`❌ 청크 ${i + 1} 번역 실패:`, error);
-        // 실패한 항목은 원본 그대로 반환
-        results.push(...chunk.map(item => ({
+        console.log(`✅ 청크 ${chunkIndex + 1}/${chunks.length} 완료 (${progress}%)`);
+      },
+      (chunkIndex, chunk, error) => {
+        // 실패 콜백
+        console.error(`❌ 청크 ${chunkIndex + 1} 번역 실패:`, error);
+        resultsMap.set(chunkIndex, chunk.map(item => ({
           id: item.id,
           translated: item.text
         })));
+        completedCount++;
+
+        const progress = Math.round((completedCount / chunks.length) * 100);
+        chrome.runtime.sendMessage({
+          type: 'TRANSLATION_PROGRESS',
+          progress: progress
+        }).catch(() => {});
+      }
+    );
+
+    // 순서대로 결과 조합
+    const results = [];
+    for (let i = 0; i < chunks.length; i++) {
+      if (resultsMap.has(i)) {
+        results.push(...resultsMap.get(i));
       }
     }
 
-    console.log(`✅ 번역 완료: ${results.length}개 항목`);
+    console.log(`✅ 번역 완료: ${results.length}개 항목 (병렬 처리)`);
     return results;
+  }
+
+  /**
+   * 제한된 동시성으로 청크 병렬 처리
+   * @param {Array} chunks - 처리할 청크 배열
+   * @param {string} targetLanguage - 목표 언어
+   * @param {Function} onSuccess - 성공 콜백 (chunkIndex, result)
+   * @param {Function} onError - 실패 콜백 (chunkIndex, chunk, error)
+   */
+  async _processChunksWithConcurrency(chunks, targetLanguage, onSuccess, onError) {
+    const queue = chunks.map((chunk, index) => ({ chunk, index }));
+    const activePromises = new Set();
+
+    // 워커 함수
+    const processNext = async () => {
+      if (queue.length === 0) return;
+
+      const { chunk, index } = queue.shift();
+
+      try {
+        const translatedChunk = await this._translateChunk(chunk, targetLanguage);
+        onSuccess(index, translatedChunk);
+      } catch (error) {
+        onError(index, chunk, error);
+      }
+
+      // 다음 작업 처리
+      if (queue.length > 0) {
+        await processNext();
+      }
+    };
+
+    // 동시성 제한만큼 워커 시작
+    const workers = [];
+    for (let i = 0; i < Math.min(this.maxConcurrency, chunks.length); i++) {
+      workers.push(processNext());
+    }
+
+    // 모든 워커 완료 대기
+    await Promise.all(workers);
   }
 
   /**
