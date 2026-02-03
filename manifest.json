@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "AWS Translation Assistant",
+  "name": "Translation Assistant",
   "version": "1.0.0",
-  "description": "Amazon Bedrock 기반 웹페이지 번역 어시스턴트",
+  "description": "Fast AI translation powered by Amazon Bedrock Claude. Full page & selection translation.",
 
   "permissions": [
     "activeTab",
@@ -32,7 +32,7 @@
 
   "action": {
     "default_popup": "src/popup/popup.html",
-    "default_title": "AWS Translation Assistant"
+    "default_title": "Translation Assistant"
   },
 
   "options_page": "src/options/options.html",
