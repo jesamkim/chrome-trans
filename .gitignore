@@ -30,3 +30,9 @@ coverage/
 # Chrome Extension
 *.crx
 *.pem
+
+# Web Store submission files
+WEB_STORE_CHECKLIST.md
+STORE_LISTING.md
+package-extension.sh
+*-webstore.zip
