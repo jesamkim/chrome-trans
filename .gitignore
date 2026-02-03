@@ -36,3 +36,6 @@ WEB_STORE_CHECKLIST.md
 STORE_LISTING.md
 package-extension.sh
 *-webstore.zip
+
+# Backup files
+*_old.*

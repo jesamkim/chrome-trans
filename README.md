@@ -1,4 +1,4 @@
-# AWS Translation Assistant Chrome Extension
+# Translation Assistant Chrome Extension
 
 Amazon Bedrock Claude Haiku 4.5 기반 웹페이지 번역 Chrome Extension
 
