@@ -6,6 +6,7 @@ Amazon Bedrock Claude Haiku 4.5 기반 웹페이지 번역 Chrome Extension
 
 - **웹페이지 전체 번역**: 현재 페이지를 한글로 번역
 - **선택 영역 번역**: 드래그한 텍스트만 빠르게 번역
+- **병렬 처리 속도 조절**: 1~5단계로 번역 속도 조절 가능 (워커 풀 패턴)
 - **원본 복원**: 클릭 한 번으로 원본 페이지로 복원
 - **Amazon Bedrock 연동**: Claude Haiku 4.5 모델 사용
 - **보안 정책 준수**: 회사 내부 노트북에서 웹페이지 번역 (Google Translate, Deepl 등이 허용되지 않는 환경)
@@ -44,12 +45,29 @@ Amazon Bedrock Claude Haiku 4.5 기반 웹페이지 번역 Chrome Extension
 - 모든 텍스트가 한국어로 번역됨
 - "Original Page" 버튼으로 원본 복원 가능
 
+### 5. 병렬 처리 속도 조절
+*Popup UI의 동시성 제어 슬라이더*
+
+- 번역 속도를 1~5단계로 조절 가능
+- 워커 풀 패턴 기반 병렬 처리
+- 기본값: 3 (균형잡힌 속도)
+- 설정 1: 느림 (순차 처리, API rate limit 걱정 시)
+- 설정 5: 가장 빠름 (최대 병렬 처리)
+
+**성능 비교:**
+| 설정 | 10개 청크 | 속도 |
+|-----|----------|------|
+| 1 | ~30초 | 가장 느림 |
+| 3 | ~12초 | 균형 (기본) |
+| 5 | ~7초 | 가장 빠름 |
+
 ## 기술 스택
 
 - Chrome Extension Manifest V3
 - Amazon Bedrock Runtime API
 - Claude Haiku 4.5 (`global.anthropic.claude-haiku-4-5-20251001-v1:0`)
-- AWS SDK for JavaScript v3
+- Worker Pool Pattern (제한된 동시성 병렬 처리)
+- Dynamic Content Script Injection
 
 ## 설치 방법
 
