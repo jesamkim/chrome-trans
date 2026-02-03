@@ -11,6 +11,7 @@
     <header>
       <h1>Translation Assistant</h1>
       <p class="subtitle">Powered by Amazon Bedrock Claude Haiku 4.5</p>
+      <p class="version">v1.1.0</p>
     </header>
 
     <main>
@@ -22,6 +23,29 @@
         <div id="translation-status" class="status-item">
           <span class="status-label">페이지 상태:</span>
           <span id="page-status-indicator" class="status-value">확인 중...</span>
+        </div>
+      </div>
+
+      <div id="concurrency-section" class="section">
+        <div class="concurrency-control">
+          <label for="concurrency-slider" class="concurrency-label">
+            <span>병렬 처리 속도:</span>
+            <span id="concurrency-value" class="concurrency-value">3</span>
+          </label>
+          <div class="slider-container">
+            <input
+              type="range"
+              id="concurrency-slider"
+              min="1"
+              max="5"
+              value="3"
+              class="concurrency-slider"
+            >
+            <div class="slider-labels">
+              <span>느림 (1)</span>
+              <span>빠름 (5)</span>
+            </div>
+          </div>
         </div>
       </div>
 

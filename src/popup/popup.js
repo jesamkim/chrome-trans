@@ -15,6 +15,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const errorText = document.getElementById('error-text');
   const infoSection = document.getElementById('info-section');
   const infoText = document.getElementById('info-text');
+  const concurrencySlider = document.getElementById('concurrency-slider');
+  const concurrencyValue = document.getElementById('concurrency-value');
+
+  // 동시성 설정 로드
+  await loadConcurrencySettings();
 
   // 초기 상태 확인
   await checkStatus();
@@ -23,6 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   translateBtn.addEventListener('click', handleTranslate);
   restoreBtn.addEventListener('click', handleRestore);
   settingsBtn.addEventListener('click', openSettings);
+  concurrencySlider.addEventListener('input', handleConcurrencyChange);
 
   /**
    * 상태 확인
@@ -234,6 +240,38 @@ document.addEventListener('DOMContentLoaded', async () => {
   function hideMessages() {
     errorSection.style.display = 'none';
     infoSection.style.display = 'none';
+  }
+
+  /**
+   * 동시성 설정 로드
+   */
+  async function loadConcurrencySettings() {
+    try {
+      const result = await chrome.storage.sync.get(['maxConcurrency']);
+      const maxConcurrency = result.maxConcurrency || 3;
+
+      concurrencySlider.value = maxConcurrency;
+      concurrencyValue.textContent = maxConcurrency;
+
+      console.log('✅ 동시성 설정 로드:', maxConcurrency);
+    } catch (error) {
+      console.error('동시성 설정 로드 실패:', error);
+    }
+  }
+
+  /**
+   * 동시성 슬라이더 변경 처리
+   */
+  async function handleConcurrencyChange(event) {
+    const value = parseInt(event.target.value);
+    concurrencyValue.textContent = value;
+
+    try {
+      await chrome.storage.sync.set({ maxConcurrency: value });
+      console.log('✅ 동시성 설정 저장:', value);
+    } catch (error) {
+      console.error('동시성 설정 저장 실패:', error);
+    }
   }
 
   /**

@@ -20,9 +20,20 @@ class TranslationManager {
   async translateTexts(textItems, targetLanguage = '한국어') {
     console.log(`🔄 번역 시작: ${textItems.length}개 항목`);
 
+    // 사용자 설정에서 동시성 값 로드
+    try {
+      const result = await chrome.storage.sync.get(['maxConcurrency']);
+      if (result.maxConcurrency) {
+        this.maxConcurrency = result.maxConcurrency;
+        console.log(`⚙️ 동시성 설정 로드: ${this.maxConcurrency}`);
+      }
+    } catch (error) {
+      console.warn('동시성 설정 로드 실패, 기본값 사용:', this.maxConcurrency);
+    }
+
     // 청크로 분할
     const chunks = this._splitIntoChunks(textItems);
-    console.log(`📦 ${chunks.length}개 청크로 분할됨`);
+    console.log(`📦 ${chunks.length}개 청크로 분할됨 (동시성: ${this.maxConcurrency})`);
 
     // 병렬 처리를 위한 결과 맵 (순서 보장)
     const resultsMap = new Map();

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Translation Assistant",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Fast AI translation powered by Amazon Bedrock Claude. Full page & selection translation.",
 
   "permissions": [
